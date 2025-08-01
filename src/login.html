@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Numbers App - Login</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa; /* Lighter background for a cleaner feel */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        /* Desktop message for larger screens */
+        .desktop-message {
+            display: none; /* Hidden by default for mobile */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            color: #4a5568; /* Gray-700 */
+        }
+        @media (min-width: 768px) { /* Show on desktop */
+            .desktop-message {
+                display: flex;
+            }
+            #login-container {
+                display: none; /* Hide login form on desktop */
+            }
+        }
+        /* Mobile-only display for the login form */
+        #login-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-y: auto;
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        /* Consistent button styling across the app */
+        .app-button {
+            display: block; /* Ensures full width within its container */
+            width: 100%;
+            font-weight: 600; /* semibold */
+            padding-top: 0.75rem; /* py-3 */
+            padding-bottom: 0.75rem; /* py-3 */
+            padding-left: 1rem; /* px-4 */
+            padding-right: 1rem; /* px-4 */
+            border-radius: 0.5rem; /* rounded-lg */
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow-md */
+            transition: all 0.3s ease-in-out; /* transition duration-300 ease-in-out */
+            text-align: center;
+            cursor: pointer;
+        }
+        .app-button:hover:not(:disabled) {
+            transform: translateY(-1px); /* Subtle lift on hover */
+        }
+        .app-button:focus {
+            outline: none; /* Focus outline is handled by ring classes */
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5); /* blue-500 ring */
+        }
+        .app-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none; /* No lift on disabled */
+            box-shadow: none; /* No shadow on disabled */
+        }
+        /* Specific button colors */
+        .app-button-blue {
+            background-color: #4285F4; /* Google Blue */
+            color: white;
+        }
+        .app-button-blue:hover:not(:disabled) {
+            background-color: #357ae8; /* Darker Blue on hover */
+        }
+        .app-button-green {
+            background-color: #34A853; /* Google Green */
+            color: white;
+        }
+        .app-button-green:hover:not(:disabled) {
+            background-color: #2c8c43; /* Darker Green on hover */
+        }
+        .app-button-gray {
+            background-color: #e0e0e0; /* Light gray */
+            color: #424242; /* Darker text */
+        }
+        .app-button-gray:hover:not(:disabled) {
+            background-color: #d5d5d5;
+        }
+        /* Message Box styling */
+        .app-message-box {
+            padding: 0.75rem 1rem; /* px-4 py-3 */
+            border-radius: 0.5rem; /* rounded-lg */
+            font-size: 0.875rem; /* text-sm */
+            position: relative;
+        }
+        .app-message-box.warning {
+            background-color: #fffde7; /* yellow-100 */
+            border-color: #ffe082; /* yellow-400 */
+            color: #f9a825; /* yellow-700 */
+        }
+        .app-message-box .close-btn {
+            position: absolute;
+            top: 0.75rem; /* px-3 */
+            right: 1rem; /* py-3 */
+            cursor: pointer;
+        }
+        .app-message-box .close-btn svg {
+            fill: currentColor;
+            height: 1.25rem; /* h-5 */
+            width: 1.25rem; /* w-5 */
+            color: #f9a825; /* Match warning color */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 antialiased">
+
+    <!-- Desktop Message for larger screens -->
+    <div class="desktop-message fixed inset-0 bg-gray-100 z-50">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 text-blue-500 mb-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3.75m3-2.25V3.75M10.5 3.75H13.5m-3 6V7.5m3 2.25V7.5m-3 3.75V11.25m3 2.25V11.25m-3 3.75V15.75m3 2.25V15.75m-3 3.75V19.5m3 2.25V19.5M10.5 7.5H13.5m-3 3.75H13.5m-3 3.75H13.5m-3 3.75H13.5" />
+        </svg>
+        <p class="text-2xl font-semibold mb-2">Designed for Mobile</p>
+        <p class="text-lg max-w-md">Please open this application on a smartphone or tablet for the best experience.</p>
+    </div>
+
+    <!-- Login Form Container (Mobile Only) -->
+    <div id="login-container" class="w-full max-w-sm bg-white rounded-2xl shadow-xl p-6 m-4 border border-gray-100">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Welcome</h1>
+
+        <div class="mb-4">
+            <label for="email" class="block text-gray-700 text-sm font-medium mb-1">Email address</label>
+            <input type="email" id="email" class="shadow-sm border border-gray-300 rounded-lg w-full py-2.5 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="your@example.com" autocomplete="email">
+        </div>
+        <div class="mb-6">
+            <label for="password" class="block text-gray-700 text-sm font-medium mb-1">Password</label>
+            <input type="password" id="password" class="shadow-sm border border-gray-300 rounded-lg w-full py-2.5 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Minimum 6 characters" autocomplete="current-password">
+        </div>
+
+        <div class="space-y-4 mb-6">
+            <button id="login-btn" class="app-button app-button-blue">
+                Login
+            </button>
+            <div class="text-center">
+                <a href="#" id="forgot-password-link" class="text-sm text-blue-600 hover:underline">Forgot Password?</a>
+            </div>
+            <button id="signup-btn" class="app-button app-button-green">
+                Sign Up
+            </button>
+        </div>
+ 
+        <!-- Message Box for user feedback -->
+        <div id="message-box" class="hidden app-message-box warning border" role="alert">
+            <p id="message-text" class="text-sm"></p>
+            <span class="close-btn" onclick="document.getElementById('message-box').classList.add('hidden');">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 2.65a1.2 1.2 0 1 1-1.697-1.697L8.303 10l-2.651-2.651a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-2.651a1.2 1.2 0 1 1 1.697 1.697L11.697 10l2.651 2.651a1.2 1.2 0 0 1 0 1.698z"/></svg>
+            </span>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgot-password-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm relative overflow-y-auto max-h-full">
+            <button id="close-modal-btn" class="absolute top-3 right-4 text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
+            <h2 class="text-2xl font-bold text-center text-gray-800 mb-4">Reset Password</h2>
+            <p class="text-center text-gray-600 text-sm mb-6">Enter your email address and we will send you a link to reset your password.</p>
+
+            <div class="mb-4">
+                <label for="forgot-password-email" class="block text-gray-700 text-sm font-medium mb-1">Email address</label>
+                <input type="email" id="forgot-password-email" class="shadow-sm border border-gray-300 rounded-lg w-full py-2.5 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="your@example.com" autocomplete="email">
+            </div>
+
+            <div class="space-y-4">
+                <button id="send-reset-link-btn" class="app-button app-button-blue">
+                    Send Reset Link
+                </button>
+                <button id="cancel-reset-btn" class="app-button app-button-gray">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Webpack will inject the bundled login.js here -->
+    <script src="./js/login.js"></script>
+</body>
+</html>

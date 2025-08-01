@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Numbers App</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- NEW: Font Awesome for Icons (Customer Service, Notification, User) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa; /* Consistent lighter background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevent scrolling on desktop message */
+        }
+        /* Desktop message for larger screens */
+        .desktop-message {
+            display: none; /* Hidden by default for mobile */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            color: #4a5568; /* Gray-700 */
+        }
+        @media (min-width: 768px) { /* Show on desktop */
+            .desktop-message {
+                display: flex;
+            }
+            #app-container {
+                display: none !important; /* Hide app content on desktop */
+            }
+        }
+        /* Mobile-only display for the app content */
+        #app-container {
+            display: flex; /* Show app content on mobile */
+            flex-direction: column;
+            justify-content: flex-start; /* Align content to top */
+            align-items: center;
+            overflow-y: auto; /* Allow scrolling if content overflows */
+            max-height: 100vh; /* Constrain height to enable internal scrolling */
+            padding-top: 2rem; /* Add some top padding */
+            padding-bottom: 2rem; /* Add some bottom padding */
+        }
+        /* Custom scrollbar for better mobile feel */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e9ecef;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #4285F4, #34A853);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #357ae8, #2c8c43); /* Darker gradient on hover */
+            cursor: pointer;
+        }
+        /* Tier badge specific styles (retained) */
+        .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px; /* Full rounded */
+            font-weight: 600; /* Semibold */
+            font-size: 0.75rem; /* text-xs */
+            text-transform: uppercase;
+            letter-spacing: 0.05em; /* tracking-wider */
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+        }
+        .tier-badge-tier1 {
+            background-color: #d1d5db; /* gray-300 */
+            color: #374151; /* gray-700 */
+        }
+        .tier-badge-tier2 {
+            background-color: #e9d5ff; /* purple-200 */
+            color: #6d28d9; /* purple-700 */
+        }
+        .tier-badge-tier3 {
+            background-color: #fecaca; /* red-200 */
+            color: #dc2626; /* red-700 */
+        }
+        /* Consistent app-button styling (from login.html) */
+        .app-button {
+            display: block;
+            width: 100%;
+            font-weight: 600;
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease-in-out;
+            text-align: center;
+            cursor: pointer;
+            box-sizing: border-box; /* Include padding and border in the element's total width and height */
+        }
+        .app-button:hover:not(:disabled) {
+            transform: translateY(-1px);
+        }
+        .app-button:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5); /* blue-500 ring */
+        }
+        .app-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .app-button-blue {
+            background-color: #4285F4;
+            color: white;
+        }
+        .app-button-blue:hover:not(:disabled) {
+            background-color: #357ae8;
+        }
+        .app-button-green {
+            background-color: #34A853;
+            color: white;
+        }
+        .app-button-green:hover:not(:disabled) {
+            background-color: #2c8c43;
+        }
+        .app-button-gray {
+            background-color: #e0e0e0;
+            color: #424242;
+        }
+        .app-button-gray:hover:not(:disabled) {
+            background-color: #d5d5d5;
+        }
+        .app-button-red { /* For delete/error actions */
+            background-color: #DB4437; /* Google Red */
+            color: white;
+        }
+        .app-button-red:hover:not(:disabled) {
+            background-color: #cc362c;
+        }
+        .app-button-yellow { /* For edit/warning actions */
+            background-color: #F4B400; /* Google Yellow */
+            color: white;
+        }
+        .app-button-yellow:hover:not(:disabled) {
+            background-color: #d49f00;
+        }
+        .app-button-purple { /* For profile button */
+            background-color: #673AB7; /* Google Deep Purple */
+            color: white;
+        }
+        .app-button-purple:hover:not(:disabled) {
+            background-color: #5b2fa3;
+        }
+        /* Message Box styling (consistent) */
+        .app-message-box {
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            position: relative;
+        }
+        .app-message-box.warning {
+            background-color: #fffde7;
+            border-color: #ffe082;
+            color: #f9a825;
+        }
+        .app-message-box.info {
+            background-color: #e3f2fd; /* blue-100 */
+            border-color: #90caf9; /* blue-400 */
+            color: #2196f3; /* blue-700 */
+        }
+        .app-message-box.success {
+            background-color: #e8f5e9; /* green-100 */
+            border-color: #a5d6a7; /* green-400 */
+            color: #4caf50; /* green-700 */
+        }
+        .app-message-box.error {
+            background-color: #ffebee; /* red-100 */
+            border-color: #ef9a9a; /* red-400 */
+            color: #f44336; /* red-700 */
+        }
+        .app-message-box .close-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 1rem;
+            cursor: pointer;
+        }
+        .app-message-box .close-btn svg {
+            fill: currentColor;
+            height: 1.25rem;
+            width: 1.25rem;
+            /* Colors match message type for close btn */
+        }
+        .app-message-box.warning .close-btn svg { color: #f9a825; }
+        .app-message-box.info .close-btn svg { color: #2196f3; }
+        .app-message-box.success .close-btn svg { color: #4caf50; }
+        .app-message-box.error .close-btn svg { color: #f44336; }
+
+        /* Custom spinner for initial loader */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #4285F4; /* Google Blue */
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #initial-loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f8f9fa; /* Match body background */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; /* Ensure it's on top */
+            opacity: 1;
+            transition: opacity 0.3s ease-out;
+        }
+        #initial-loader-overlay.hidden {
+            opacity: 0;
+            pointer-events: none; /* Make it unclickable when hidden */
+        }
+        /* Country button styling */
+        .country-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.6rem 0.5rem; /* Slightly more compact for grid */
+            border-radius: 0.5rem;
+            font-weight: 500; /* medium */
+            font-size: 0.9rem; /* text-sm default */
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            box-sizing: border-box;
+            border: 1px solid transparent; /* default transparent border */
+        }
+        .country-btn-default {
+            background-color: #f0f0f0; /* Light gray background */
+            color: #424242; /* Dark text */
+        }
+        .country-btn-default:hover:not(:disabled) {
+            background-color: #e0e0e0;
+            transform: translateY(-1px);
+        }
+        .country-btn-selected {
+            background-color: #e8f0fe; /* Light blue background */
+            color: #1a73e8; /* Google Blue text */
+            border-color: #a8d1ff; /* Light blue border */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .country-btn-disabled {
+            background-color: #f5f5f5;
+            color: #a0a0a0;
+            cursor: not-allowed;
+            opacity: 0.7;
+            box-shadow: none;
+            transform: none;
+        }
+        /* NEW: Keyframes for the pulse animation on the contact icon */
+        @keyframes pulse-green {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(52, 168, 83, 0.7);
+            }
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(52, 168, 83, 0);
+            }
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(52, 168, 83, 0);
+            }
+        }
+        .animate-pulse-green {
+            animation: pulse-green 2s infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 antialiased">
+
+    <!-- Initial Loader Overlay -->
+    <div id="initial-loader-overlay">
+        <div class="spinner mb-3"></div>
+        <p class="text-gray-700 text-lg font-medium">Loading App...</p>
+    </div>
+
+    <!-- Desktop Message for larger screens -->
+    <div class="desktop-message fixed inset-0 bg-gray-100 z-50">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 text-blue-500 mb-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3.75m3-2.25V3.75M10.5 3.75H13.5m-3 6V7.5m3 2.25V7.5m-3 3.75V11.25m3 2.25V11.25m-3 3.75V15.75m3 2.25V15.75m-3 3.75V19.5m3 2.25V19.5M10.5 7.5H13.5m-3 3.75H13.5m-3 3.75H13.5m-3 3.75H13.5" />
+        </svg>
+        <p class="text-2xl font-semibold mb-2">Designed for Mobile</p>
+        <p class="text-lg max-w-md">Please open this application on a smartphone or tablet for the best experience.</p>
+    </div>
+
+    <!-- Main Application Container (Mobile Only) -->
+    <div id="app-container" class="w-full max-w-md bg-white rounded-2xl shadow-xl p-4 m-2 border border-gray-100 opacity-0 pointer-events-none">
+        <!-- IMPROVED: Top Header Section -->
+        <header class="flex justify-between items-center pb-4 mb-6 w-full border-b border-gray-200">
+            <!-- Left side: User Greeting -->
+            <a href="profile.html" id="user-greeting-link" class="flex items-center text-gray-700 hover:text-blue-600 transition-colors duration-200 no-underline">
+                <i class="fas fa-user-circle text-2xl mr-2"></i>
+                <span id="user-greeting" class="font-semibold">Hi, ...</span>
+            </a>
+            <!-- Right side: Icons -->
+            <div class="flex items-center space-x-5">
+                <a href="#" id="notifications-icon" class="relative text-gray-600 hover:text-blue-600 transition-colors duration-200 group">
+                    <i class="far fa-bell text-2xl transition-transform duration-200 ease-in-out group-hover:rotate-12"></i>
+                    <span id="notification-badge" class="absolute -top-1 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                        1
+                    </span>
+                </a>
+                <a href="#" id="customer-service-icon" target="_blank" rel="noopener noreferrer" class="relative flex items-center justify-center w-12 h-12 bg-green-500 text-white rounded-full shadow-lg hover:bg-green-600 transition-all duration-300 transform hover:scale-110 animate-pulse-green">
+                    <i class="fas fa-headset text-xl"></i>
+                </a>
+            </div>
+        </header>
+        
+        <!-- Quick Start Guide (Initially hidden) -->
+        <div id="quick-start-guide" class="hidden w-full app-message-box info border mb-6" role="alert">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h3 class="font-bold text-lg mb-2">🚀 Quick Start Guide</h3>
+                    <ol class="list-decimal list-inside text-sm space-y-1">
+                        <li><strong>Select a Country:</strong> Pick your desired country below.</li>
+                        <li><strong>Get a Number:</strong> Tap 'Next Number' to receive a number.</li>
+                        <li><strong>Save It:</strong> Like the number? Hit 'Save Number' to keep it.</li>
+                    </ol>
+                </div>
+                <button id="close-guide-btn" class="text-blue-700 hover:text-blue-900 -mt-1 -mr-1">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- RE-IMPROVED: Daily Status Section -->
+        <div class="bg-gray-50 p-4 rounded-xl mb-6 shadow-sm border border-gray-100 w-full">
+            <div class="flex justify-center items-center text-gray-600 mb-3 border-b pb-3">
+                <i class="far fa-calendar-alt mr-2 text-lg text-gray-500"></i>
+                <span id="current-date" class="font-medium text-gray-800">Loading date...</span>
+            </div>
+            <div class="flex justify-between items-center mt-3">
+                <div class="text-right">
+                    <p class="text-sm font-semibold mb-1 text-gray-500">Your Tier</p>
+                    <p id="user-tier-badge" class="tier-badge tier-badge-tier1">Loading...</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm font-semibold text-gray-500">Numbers Left Today</p>
+                    <p id="numbers-left" class="text-3xl font-bold text-blue-600">0</p>
+                </div>
+            </div>
+            <div id="loading-indicator" class="text-center text-blue-500 font-medium hidden mt-2">
+                <svg class="animate-spin h-5 w-5 text-blue-500 inline-block mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Loading...
+            </div>
+        </div>
+
+        <!-- Country Selection Section -->
+        <section id="country-selection-section" class="bg-gray-50 p-4 rounded-xl mb-6 shadow-sm border border-gray-100">
+            <h2 class="text-lg font-semibold text-gray-800 mb-3 text-center">Select Your Country</h2>
+            <div id="country-buttons" class="grid grid-cols-3 gap-2">
+                <!-- Country buttons will be dynamically inserted here by JavaScript -->
+            </div>
+            <p id="country-lock-message" class="text-sm text-red-600 text-center mt-3 hidden">
+                Your country selection is locked until [date]. Upgrade to Tier 3 or exhaust daily limit to change.
+            </p>
+        </section>
+
+        <!-- Number Display Section -->
+        <section class="bg-gradient-to-br from-blue-500 to-green-500 p-6 rounded-2xl text-white text-center mb-6 shadow-lg flex flex-col items-center justify-center min-h-[140px]">
+            <p id="whatsapp-number" class="text-2xl font-extrabold tracking-wide drop-shadow-md">---</p>
+            <p id="number-status" class="text-sm font-light mt-2 opacity-90"></p>
+        </section>
+
+        <!-- Action Buttons -->
+        <section class="grid grid-cols-2 gap-4 mb-6">
+            <button id="next-number-btn" class="app-button app-button-green">
+                Next Number
+            </button>
+            <button id="save-number-btn" class="app-button app-button-blue">
+                Save Number
+            </button>
+        </section>
+
+        <!-- Copy and WhatsApp Chat Buttons (Initially hidden) -->
+        <section id="post-save-actions" class="grid grid-cols-2 gap-4 mb-6 hidden">
+            <button id="copy-number-btn" class="app-button app-button-gray">
+                Copy Number
+            </button>
+            <button id="whatsapp-chat-btn" class="app-button app-button-green">
+                Chat on WhatsApp
+            </button>
+        </section>
+
+        <!-- Message Box for user feedback -->
+        <div id="message-box" class="hidden app-message-box warning border" role="alert">
+            <p id="message-text" class="text-sm"></p>
+            <span class="close-btn" onclick="document.getElementById('message-box').classList.add('hidden');">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 2.65a1.2 1.2 0 1 1-1.697-1.697L8.303 10l-2.651-2.651a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-2.651a1.2 1.2 0 1 1 1.697 1.697L11.697 10l2.651 2.651a1.2 1.2 0 0 1 0 1.698z"/></svg>
+            </span>
+        </div>
+
+    </main>
+
+    <footer class="mt-10 text-center text-gray-500 text-sm">
+        &copy; <span id="current-year"></span> Your Name. All rights reserved.
+    </footer>
+
+    <script src="./js/main.js"></script>
+</body>
+</html>
